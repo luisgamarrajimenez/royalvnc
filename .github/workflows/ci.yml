@@ -178,25 +178,25 @@ jobs:
         path: |
           Bindings/dotnet/RoyalApps.RoyalVNCKit/bin/Release/RoyalApps.RoyalVNCKit.*.nupkg
     
-    # Kotlin bindings and Android AAR artifacts
+    # Kotlin bindings and Android AAR artifacts (skipped for now)
 
-    - name: install Android dependencies
-      if: "success() && matrix.env.OS == 'apple'"
-      run: |
-        ./android_dependencies.sh
+    # - name: install Android dependencies
+    #   if: "success() && matrix.env.OS == 'apple'"
+    #   run: |
+    #     ./android_dependencies.sh
 
-    - name: build Android libraries
-      if: "success() && matrix.env.OS == 'apple'"
-      run: |
-        ./android_build.sh
+    # - name: build Android libraries
+    #   if: "success() && matrix.env.OS == 'apple'"
+    #   run: |
+    #     ./android_build.sh
 
-    - name: publish Android artifacts
-      if: "success() && matrix.env.OS == 'apple'"
-      uses: actions/upload-artifact@v6
-      with:
-        name: "royalvnc-android-arm64"
-        retention-days: 5
-        if-no-files-found: "error"
-        path: |
-          Bindings/kotlin/RoyalVNCAndroidTest/royalvnc/build/distributions/royalvnc.zip
-          Bindings/kotlin/RoyalVNCAndroidTest/swiftRuntime/build/distributions/swiftRuntime_android.zip
+    # - name: publish Android artifacts
+    #   if: "success() && matrix.env.OS == 'apple'"
+    #   uses: actions/upload-artifact@v6
+    #   with:
+    #     name: "royalvnc-android-arm64"
+    #     retention-days: 5
+    #     if-no-files-found: "error"
+    #     path: |
+    #       Bindings/kotlin/RoyalVNCAndroidTest/royalvnc/build/distributions/royalvnc.zip
+    #       Bindings/kotlin/RoyalVNCAndroidTest/swiftRuntime/build/distributions/swiftRuntime_android.zip
