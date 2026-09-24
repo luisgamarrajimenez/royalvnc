@@ -144,3 +144,12 @@ public extension VNCConnection {
 		keyUp(.init(key))
 	}
 }
+
+// MARK: - Clipboard (RemoteMac fork patch 2)
+public extension VNCConnection {
+	/// Sends text to the server's clipboard (ClientCutText). RFB mandates Latin-1; pass `.utf8`
+	/// only to probe a server. Text that cannot be represented in `encoding` is sent empty.
+	func sendClipboardText(_ text: String, encoding: String.Encoding = .isoLatin1) {
+		enqueueClientCutTextMessage(text, encoding: encoding)
+	}
+}

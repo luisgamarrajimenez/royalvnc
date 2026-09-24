@@ -58,8 +58,9 @@ extension VNCConnection {
 		enqueueClientToServerMessage(pointerEvent)
 	}
 
-	func enqueueClientCutTextMessage(_ text: String) {
-		let clientCutTextMessage = VNCProtocol.ClientCutText(text: text)
+	func enqueueClientCutTextMessage(_ text: String,
+									 encoding: String.Encoding = VNCProtocol.ClientCutText.stringEncoding) {
+		let clientCutTextMessage = VNCProtocol.ClientCutText(text: text, encoding: encoding)
 
 		enqueueClientToServerMessage(clientCutTextMessage)
 	}

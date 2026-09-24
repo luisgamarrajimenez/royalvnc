@@ -27,6 +27,9 @@ public final class VNCConnection: NSObjectOrAnyObject {
 #endif
 	public weak var delegate: VNCConnectionDelegate?
 
+	/// RemoteMac fork patch 3: optional receiver for server clipboard text.
+	public weak var clipboardDelegate: VNCConnectionClipboardDelegate?
+
 #if canImport(ObjectiveC)
 	@objc
 #endif

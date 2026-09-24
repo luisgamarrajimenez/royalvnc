@@ -11,12 +11,14 @@ extension VNCProtocol {
 		static let stringEncoding: String.Encoding = .isoLatin1
 
 		let text: String
+		/// RemoteMac fork: encoding used on the wire. RFB specifies Latin-1; UTF-8 is used to probe server behaviour.
+		var encoding: String.Encoding = Self.stringEncoding
 	}
 }
 
 extension VNCProtocol.ClientCutText {
 	var data: Data {
-		var latin1TextData = text.data(using: Self.stringEncoding) ?? .init()
+		var latin1TextData = text.data(using: encoding) ?? .init()
 		var textLength = latin1TextData.count
 
 		if textLength > UInt32.max {

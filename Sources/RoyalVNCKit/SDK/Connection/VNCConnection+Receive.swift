@@ -107,6 +107,10 @@ private extension VNCConnection {
 
 		logger.logDebug("Received Clipboard Text from Server")
 
+		if serverCutText.extended == nil {
+			clipboardDelegate?.connection(self, didReceiveClipboardText: text, rawData: serverCutText.rawData)
+		}
+
 		guard settings.isClipboardRedirectionEnabled else { return }
 
 		clipboard.text = text

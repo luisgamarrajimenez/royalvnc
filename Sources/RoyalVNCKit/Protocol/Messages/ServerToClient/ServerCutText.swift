@@ -14,6 +14,8 @@ extension VNCProtocol {
 
         let messageType: UInt8
         let text: String
+		/// RemoteMac fork: the undecoded bytes of a standard (non-extended) message.
+		let rawData: Data
 
 		let extended: ExtendedServerCutText?
     }
@@ -28,11 +30,12 @@ extension VNCProtocol.ServerCutText {
 											 logger: logger)
 
 		if length >= 0 { // Standard Message
-			let text = try await connection.readString(encoding: Self.stringEncoding,
-													   length: .init(length))
+			let rawData = try await connection.read(length: .init(length))
+			let text = String(data: rawData, encoding: Self.stringEncoding) ?? ""
 
 			return .init(messageType: Self.messageType,
 						 text: text,
+						 rawData: rawData,
 						 extended: nil)
 		} else { // Extended Message
 			let extendedLength = Int32(abs(length))
@@ -43,6 +46,7 @@ extension VNCProtocol.ServerCutText {
 
 			return .init(messageType: Self.messageType,
 						 text: "",
+						 rawData: .init(),
 						 extended: extended)
 		}
     }
