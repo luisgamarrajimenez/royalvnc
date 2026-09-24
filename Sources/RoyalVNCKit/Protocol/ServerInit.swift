@@ -27,6 +27,13 @@ extension VNCProtocol.ServerInit {
 		let frameBufferWidth = try await connection.readUInt16()
 		let frameBufferHeight = try await connection.readUInt16()
 
+		// RemoteMac fork patch 7
+		guard frameBufferWidth > 0, frameBufferHeight > 0,
+			  frameBufferWidth <= VNCProtocol.Limits.maxFramebufferSide,
+			  frameBufferHeight <= VNCProtocol.Limits.maxFramebufferSide else {
+			throw VNCError.protocol(.boundsViolation("framebuffer \(frameBufferWidth)x\(frameBufferHeight)"))
+		}
+
 		let pixelFormat = try await VNCProtocol.PixelFormat.receive(connection: connection)
 
 		let name = try await connection.readString(encoding: .utf8)

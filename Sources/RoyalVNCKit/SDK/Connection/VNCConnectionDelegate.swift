@@ -48,6 +48,15 @@ public protocol VNCConnectionDelegate: AnyObject {
 					didUpdateCursor cursor: VNCCursor)
 }
 
+/// RemoteMac fork patch 8: per-update timing for diagnostics.
+public protocol VNCConnectionMetricsDelegate: AnyObject {
+	/// Called after each FramebufferUpdate message has been fully received and decoded.
+	/// `duration` covers receive + decode of the whole message.
+	func connection(_ connection: VNCConnection,
+					didReceiveFramebufferUpdateWithRectangleCount rectangleCount: Int,
+					duration: TimeInterval)
+}
+
 /// RemoteMac fork patch 3: receives server clipboard text without the library touching the
 /// system pasteboard. Set `VNCConnection.clipboardDelegate` to use it.
 public protocol VNCConnectionClipboardDelegate: AnyObject {

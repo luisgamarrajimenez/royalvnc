@@ -36,7 +36,8 @@ extension ZlibStream {
 		try stream.inflateReset()
 	}
 
-    func decompressedData(compressedData: Data) throws -> Data {
+    func decompressedData(compressedData: Data,
+                          maximumLength: Int = .max) throws -> Data {   // RemoteMac fork patch 7: bounds the output
 		let stream = self.stream
 		let flush = ZlibFlush.noFlush
 
@@ -90,6 +91,11 @@ extension ZlibStream {
 						if actualOut > 0 {
 							decompressedData.append(buffer,
 													count: .init(actualOut))
+
+							// RemoteMac fork patch 7
+							guard decompressedData.count <= maximumLength else {
+								throw VNCError.protocol(.boundsViolation("decompressed payload > \(maximumLength)"))
+							}
 						}
 					}
 				} catch {

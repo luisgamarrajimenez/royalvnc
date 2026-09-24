@@ -188,6 +188,11 @@ extension NetworkConnectionReading {
     func readString(encoding: String.Encoding) async throws -> String {
         let length = try await readUInt32()
 
+        // RemoteMac fork patch 7: no protocol string (desktop name, failure reason) is anywhere near this.
+        guard length <= 1_048_576 else {
+            throw VNCError.protocol(.boundsViolation("string length \(length) > 1 MiB"))
+        }
+
         let stringValue = try await readString(encoding: encoding,
                                                length: .init(length))
 

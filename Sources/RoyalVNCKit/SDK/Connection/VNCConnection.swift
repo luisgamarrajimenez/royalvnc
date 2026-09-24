@@ -30,6 +30,13 @@ public final class VNCConnection: NSObjectOrAnyObject {
 	/// RemoteMac fork patch 3: optional receiver for server clipboard text.
 	public weak var clipboardDelegate: VNCConnectionClipboardDelegate?
 
+	/// RemoteMac fork patch 8: the security types the server offered in the last
+	/// handshake, so callers can report an unsupported set precisely.
+	public internal(set) var offeredSecurityTypes: [UInt8] = []
+
+	/// RemoteMac fork patch 8: optional receiver for per-update timing.
+	public weak var metricsDelegate: VNCConnectionMetricsDelegate?
+
 #if canImport(ObjectiveC)
 	@objc
 #endif
@@ -74,7 +81,7 @@ public final class VNCConnection: NSObjectOrAnyObject {
 	let clipboard: VNCClipboard
 	let clipboardMonitor: VNCClipboardMonitor
 
-	var clientToServerMessageQueue = Queue<VNCSendableMessage>()
+	let clientToServerMessageQueue = MessageQueue<VNCSendableMessage>()   // RemoteMac fork patch 4
 
     var mouseButtonState: VNCProtocol.MousePointerButton = [ ]
 
@@ -297,6 +304,7 @@ extension VNCConnection {
 		guard !state.disconnectRequested else { return }
 
 		state.disconnectRequested = true
+		clientToServerMessageQueue.wake()   // RemoteMac fork patch 4: let the send loop observe the disconnect
 		updateConnectionState(.disconnecting)
 
 		connection.setStatusUpdateHandler(nil)

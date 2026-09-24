@@ -61,14 +61,23 @@ extension VNCConnection {
 private extension VNCConnection {
 	func send() async throws {
 		guard !state.disconnectRequested,
-              connection.isReady,
-			  let message = clientToServerMessageQueue.dequeue() else {
+              connection.isReady else {
 			try await Task.sleep(seconds: 0.01)
 
 			return
 		}
 
+		// RemoteMac fork patch 4: block on the queue instead of polling every 10 ms,
+		// so input bytes leave as soon as they are enqueued.
+		guard let message = clientToServerMessageQueue.dequeue() else {
+			await clientToServerMessageQueue.waitForElement()
+
+			return
+		}
+
 		try await sendMessage(message)
+
+		clientToServerMessageQueue.markSent()   // RemoteMac fork patch 8
 	}
 
 	func sendFramebufferUpdateRequest(incremental: Bool,

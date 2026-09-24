@@ -58,6 +58,16 @@ extension BigNum {
         
         return data
     }
+
+    /// RemoteMac fork patch 6: big-endian bytes left-padded with zeros to `length`,
+    /// so a value with leading zero bytes keeps the wire length the server expects.
+    func bigEndianData(paddedTo length: Int) -> Data? {
+        let data = self.bigInt.serialize()
+
+        guard data.count <= length else { return nil }
+
+        return Data(count: length - data.count) + data
+    }
 }
 
 

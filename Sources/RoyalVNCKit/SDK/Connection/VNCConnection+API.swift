@@ -82,6 +82,9 @@ public extension VNCConnection {
     func mouseWheel(_ wheel: VNCMouseWheel,
                     x: UInt16, y: UInt16,
                     steps: UInt32) {
+        // RemoteMac fork patch 5: RFB wheel "clicks" are a press *and* a release of
+        // buttons 4–7. The release was never sent, so servers saw the wheel button
+        // held until the next pointer event.
         for _ in 0..<steps {
             updateMouseButtonState(wheel: wheel,
                                    isDown: true)
@@ -91,6 +94,9 @@ public extension VNCConnection {
 
             updateMouseButtonState(wheel: wheel,
                                    isDown: false)
+
+            enqueueMouseEvent(nonNormalizedX: x,
+                              nonNormalizedY: y)
         }
     }
 }
@@ -142,6 +148,37 @@ public extension VNCConnection {
 #endif
 	func _objc_keyUp(_ key: UInt32) {
 		keyUp(.init(key))
+	}
+}
+
+// MARK: - Outgoing queue (RemoteMac fork patch 8)
+public extension VNCConnection {
+	/// Waits until every enqueued client message has been written, or the timeout
+	/// elapses. Callers use it to make sure key-up events leave before disconnecting.
+	func waitForOutgoingMessages(timeoutSeconds: Double) async {
+		let deadline = Date().addingTimeInterval(timeoutSeconds)
+
+		while clientToServerMessageQueue.outstandingCount > 0,
+			  Date() < deadline,
+			  !state.disconnectRequested {
+			try? await Task.sleep(nanoseconds: 2_000_000)
+		}
+	}
+}
+
+// MARK: - Refresh (RemoteMac fork patch 8)
+public extension VNCConnection {
+	/// Asks the server for a full, non-incremental update of the whole framebuffer.
+	func requestFullFramebufferUpdate() {
+		guard let framebuffer else { return }
+
+		let request = VNCProtocol.FramebufferUpdateRequest(incremental: false,
+															xPosition: 0,
+															yPosition: 0,
+															width: framebuffer.size.width,
+															height: framebuffer.size.height)
+
+		enqueueClientToServerMessage(request)
 	}
 }
 

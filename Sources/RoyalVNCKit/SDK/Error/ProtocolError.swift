@@ -26,6 +26,8 @@ public extension VNCError {
 		case zrlePaletteRLELengthOverflow
 		case zrleUnexpectedRLEStreamEnd
 		case unexpectedExtendedServerCutTextAction(action: UInt32)
+		/// RemoteMac fork patch 7: server data exceeded a hard limit (proposal §9).
+		case boundsViolation(String)
 
 		// MARK: - LocalizedError
 		public var errorDescription: String? {
@@ -73,6 +75,8 @@ public extension VNCError {
 					return "End of stream reached while reading ZRLE RLE run-length."
 				case .unexpectedExtendedServerCutTextAction(let action):
 					return "An unexpected ExtendedServerCutText Action (\(action)) was retrieved."
+				case .boundsViolation(let what):
+					return "The server sent data outside the allowed bounds: \(what)."
 			}
 		}
 	}

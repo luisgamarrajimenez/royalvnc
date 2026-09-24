@@ -53,17 +53,19 @@ extension VNCProtocol.ARDAuthentication {
 
 			let maxLength = 63
 
-			// Cap length at 63 as index is 0
-			let cappedUsername = usernameLength > maxLength
-				? String(username[username.startIndex..<username.index(username.startIndex, offsetBy: maxLength)])
-				: username
+			// RemoteMac fork patch 6: cap by UTF-8 *bytes* (the buffer slots are 64 bytes
+			// including the terminator); the old code capped by Characters and could
+			// overrun the slot with multi-byte text.
+			func cappedToBytes(_ text: String) -> String {
+				var capped = text
+				while capped.utf8.count > maxLength, !capped.isEmpty { capped.removeLast() }
+				return capped
+			}
 
+			let cappedUsername = usernameLength > maxLength ? cappedToBytes(username) : username
 			let cappedUsernameLength = cappedUsername.utf8.count
 
-			let cappedPassword = passwordLength > maxLength
-				? String(password[password.startIndex..<password.index(password.startIndex, offsetBy: maxLength)])
-				: password
-
+			let cappedPassword = passwordLength > maxLength ? cappedToBytes(password) : password
 			let cappedPasswordLength = cappedPassword.utf8.count
 
             // Convert username and password strings into C strings

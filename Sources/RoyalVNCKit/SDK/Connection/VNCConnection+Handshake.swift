@@ -90,6 +90,8 @@ private extension VNCConnection {
 																		number: number)
 
 			logger.logDebug("Received Security Types: \(securityTypes.securityTypes.map({ "\($0)" }))")
+
+			offeredSecurityTypes = securityTypes.authTypes   // RemoteMac fork patch 8
 		} catch {
 			throw VNCError.ConnectionError.closedDuringHandshake(handshakingPhase: "Receive Security Types",
 																 underlyingError: error)

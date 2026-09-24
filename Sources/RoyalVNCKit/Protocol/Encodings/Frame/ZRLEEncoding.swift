@@ -63,10 +63,13 @@ extension VNCProtocol.ZRLEEncoding {
 			self.tileBuffer = .init(repeating: 0, count: bufferLength)
 		}
 
+		let maximumDecompressed = Int(rectangle.width) * Int(rectangle.height) * 4 * 2 + VNCProtocol.Limits.compressedSlackBytes   // RemoteMac fork patch 7
 		let compressedData = try await VNCProtocol.ZlibEncoding.retrieveCompressedData(connection: connection,
-																					   logger: logger)
+																					   logger: logger,
+																					   maximumLength: maximumDecompressed)
 
-		let decompressedData = try zStream.decompressedData(compressedData: compressedData)
+		let decompressedData = try zStream.decompressedData(compressedData: compressedData,
+															maximumLength: maximumDecompressed)
 
 		let stream = DataStream(data: decompressedData)
 

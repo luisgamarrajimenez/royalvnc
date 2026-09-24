@@ -18,7 +18,8 @@ extension VNCProtocol.ZlibEncoding {
                          connection: NetworkConnectionReading,
                          logger: VNCLogger) async throws {
 		let compressedData = try await Self.retrieveCompressedData(connection: connection,
-																   logger: logger)
+																   logger: logger,
+																   maximumLength: Int(rectangle.width) * Int(rectangle.height) * 4 + VNCProtocol.Limits.compressedSlackBytes)
 
         let bytesPerPixel = framebuffer.sourceProperties.bytesPerPixel
 
@@ -57,8 +58,14 @@ extension VNCProtocol.ZlibEncoding {
 
 extension VNCProtocol.ZlibEncoding {
 	static func retrieveCompressedData(connection: NetworkConnectionReading,
-									   logger: VNCLogger) async throws -> Data {
+									   logger: VNCLogger,
+									   maximumLength: Int) async throws -> Data {
 		let compressedBytesToRead = Int(try await connection.readUInt32())
+
+		// RemoteMac fork patch 7: a compressed payload larger than the raw rectangle plus slack is bogus.
+		guard compressedBytesToRead <= maximumLength else {
+			throw VNCError.protocol(.boundsViolation("compressed payload \(compressedBytesToRead) > \(maximumLength)"))
+		}
 
 		guard compressedBytesToRead > 0 else {
 			logger.logDebug("Nothing to Zlib download, skipping")

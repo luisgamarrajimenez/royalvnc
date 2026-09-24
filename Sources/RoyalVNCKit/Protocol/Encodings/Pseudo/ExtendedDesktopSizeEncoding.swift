@@ -47,6 +47,13 @@ extension VNCProtocol.ExtendedDesktopSizeEncoding {
 
 		let newSize = rectangle.region.size
 
+		// RemoteMac fork patch 7
+		guard newSize.width > 0, newSize.height > 0,
+			  newSize.width <= VNCProtocol.Limits.maxFramebufferSide,
+			  newSize.height <= VNCProtocol.Limits.maxFramebufferSide else {
+			throw VNCError.protocol(.boundsViolation("extended desktop size \(newSize)"))
+		}
+
 		let numberOfScreens = try await connection.readUInt8()
 		try await connection.readPadding(length: 3)
 

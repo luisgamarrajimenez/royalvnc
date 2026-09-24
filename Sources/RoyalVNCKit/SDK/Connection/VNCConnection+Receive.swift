@@ -67,12 +67,18 @@ private extension VNCConnection {
 
 		logger.logDebug("Receiving Framebuffer Update")
 
+		let updateStart = Date()   // RemoteMac fork patch 8
+
 		let framebufferUpdate = try await VNCProtocol.FramebufferUpdate.receive(connection: connection,
 																				framebuffer: framebuffer,
 																				encodings: encodings,
 																				logger: logger)
 
 		logger.logDebug("Received Framebuffer Update: \(framebufferUpdate)")
+
+		metricsDelegate?.connection(self,
+									didReceiveFramebufferUpdateWithRectangleCount: framebufferUpdate.rectangles.count,
+									duration: Date().timeIntervalSince(updateStart))
 
 		/*
 		// Write out the framebuffer for testing purposes

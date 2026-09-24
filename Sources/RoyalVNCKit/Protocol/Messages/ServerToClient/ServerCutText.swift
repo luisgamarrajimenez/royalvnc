@@ -29,6 +29,11 @@ extension VNCProtocol.ServerCutText {
 		let length = try await receiveLength(connection: connection,
 											 logger: logger)
 
+		// RemoteMac fork patch 7
+		guard abs(length) <= VNCProtocol.Limits.maxCutTextBytes else {
+			throw VNCError.protocol(.boundsViolation("cut text length \(length)"))
+		}
+
 		if length >= 0 { // Standard Message
 			let rawData = try await connection.read(length: .init(length))
 			let text = String(data: rawData, encoding: Self.stringEncoding) ?? ""

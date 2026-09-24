@@ -18,6 +18,12 @@ extension VNCProtocol.CursorEncoding {
 		let hotspot = rectangle.region.location
 		let size = rectangle.region.size
 
+        // RemoteMac fork patch 7
+        guard size.width <= VNCProtocol.Limits.maxCursorSide,
+              size.height <= VNCProtocol.Limits.maxCursorSide else {
+            throw VNCError.protocol(.boundsViolation("cursor \(size)"))
+        }
+
         let width = Int(size.width)
         let height = Int(size.height)
 

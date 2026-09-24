@@ -75,14 +75,10 @@ private extension VNCProtocol.ARDAuthentication.DiffieHellmanKeyAgreement {
 			return nil
 		}
 
-		// Check key lengths of generated private and public DH keys
-		guard bigPrivKey.bytesCount == keyLength,
-			  bigPubKey.bytesCount == keyLength else {
-			return nil
-		}
-
-		guard let privKey = bigPrivKey.bigEndianData(),
-			  let pubKey = bigPubKey.bigEndianData() else {
+		// RemoteMac fork patch 6: keys shorter than keyLength (leading zero bytes,
+		// ~1 in 256 per key) are valid; pad instead of failing the handshake.
+		guard let privKey = bigPrivKey.bigEndianData(paddedTo: keyLength),
+			  let pubKey = bigPubKey.bigEndianData(paddedTo: keyLength) else {
 			return nil
 		}
 
@@ -112,7 +108,8 @@ private extension VNCProtocol.ARDAuthentication.DiffieHellmanKeyAgreement {
 			return nil
 		}
 
-		guard let sharedKey = bigSharedKey.bigEndianData() else {
+		// RemoteMac fork patch 6: the server hashes the secret at full prime length.
+		guard let sharedKey = bigSharedKey.bigEndianData(paddedTo: prime.count) else {
 			return nil
 		}
 

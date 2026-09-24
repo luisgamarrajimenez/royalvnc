@@ -51,6 +51,13 @@ extension VNCProtocol.FramebufferUpdate {
 			}
 
 			if let frameEncoding = encoding as? VNCFrameEncoding {
+				// RemoteMac fork patch 7
+				let fbSize = framebuffer.size
+				guard Int(rectangle.xPosition) + Int(rectangle.width) <= Int(fbSize.width),
+					  Int(rectangle.yPosition) + Int(rectangle.height) <= Int(fbSize.height) else {
+					throw VNCError.protocol(.boundsViolation("rectangle \(rectangle) outside framebuffer \(fbSize)"))
+				}
+
 				logger.logDebug("Decoding frame rectangle \(idx + 1)/\(numberOfRectangles)")
 
 				try await frameEncoding.decodeRectangle(rectangle,
