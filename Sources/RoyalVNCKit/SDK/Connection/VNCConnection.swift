@@ -32,6 +32,11 @@ public final class VNCConnection: NSObjectOrAnyObject {
 #endif
 	public var framebuffer: VNCFramebuffer?
 
+	/// When the server is Apple Remote Desktop (protocol version 3.889), the library
+	/// rewrites Command → Hyper and Option → Meta before sending key events.
+	/// Set to `false` to send X11 keysyms exactly as given. (RemoteMac fork addition.)
+	public var remapsModifierKeysForAppleRemoteDesktop = true
+
 #if canImport(ObjectiveC)
 	@objc
 #endif
